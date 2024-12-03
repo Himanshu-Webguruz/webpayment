@@ -5,7 +5,7 @@ import Tab from "react-bootstrap/Tab";
 import { Nav } from "react-bootstrap";
 import { seopackages } from "@/utils/03utilHomeTab";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 const OurSeoPackages = () => {
   const router = useRouter();
   const [showModal, setShowModal] = useState(false);
@@ -72,67 +72,79 @@ const OurSeoPackages = () => {
     };
   };
 
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []); 
+
+
   //razorpay
   const handlePayment = async () => {
     if (isLoading) return; // Prevent further calls if already loading
     setLoading(true);
     setButtonText("Processing...");
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.async = true;
-    document.body.appendChild(script);
-
-    script.onload = async () => {
-      try {
-        const response = await fetch("/api/payment", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ amount: 100 }),
-        });
-
-        const data = await response.json();
-
-        if (!data.orderId) {
-          alert("Order creation failed");
-          setLoading(false);
-          return;
+  
+    try {
+      const response = await fetch("/api/payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ amount: 100 }),
+      });
+  
+      if (!response.ok) {
+        if (response.status === 429) {
+          alert("Too many requests. Please try again later.");
+        } else {
+          alert("Order creation failed!");
         }
-
-        const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-          amount: data.amount,
-          currency: data.currency,
-          name: "Webguruz Technologies",
-          description: "Payment for Order",
-          order_id: data.orderId,
-          handler: function (response) {
-            router.push("/payment-recieved");
-          },
-          prefill: {
-            name: " ",
-            contact: " ",
-          },
-          theme: {
-            color: "#3399cc",
-          },
-        };
-
-        const razorpay = new window.Razorpay(options);
-        razorpay.open();
-        setShowModal(false);
-      } catch (error) {
-        console.error("Error during payment handling:", error);
-      } finally {
-        setLoading(false);
-        setButtonText("Proceed to Payment");
+        throw new Error("Payment API failed");
       }
-    };
-
-    return () => {
-      document.body.removeChild(script);
-    };
+  
+      const data = await response.json();
+  
+      if (!data.orderId) {
+        alert("Order creation failed");
+        setLoading(false);
+        return;
+      }
+  
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: data.amount,
+        currency: data.currency,
+        name: "Webguruz Technologies",
+        description: "Payment for Order",
+        order_id: data.orderId,
+        handler: function (response) {
+          router.push("/payment-recieved");
+        },
+        prefill: {
+          name: " ",
+          contact: " ",
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+  
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error during payment handling:", error);
+    } finally {
+      setLoading(false);
+      setButtonText("Proceed to Payment");
+    }
   };
 
   const handleCountryChange = (event) => {
@@ -257,7 +269,10 @@ const OurSeoPackages = () => {
                                     {buttonText}
                                   </button>
                                 </div>
+                             
+
                                 <div id="paypal-button-container"></div>
+                            
                               </div>
                             </div>
                           </div>
