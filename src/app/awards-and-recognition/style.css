@@ -1,0 +1,51 @@
+.awards-recog {
+    background-image: url(/images/awardsimg/awards-banner.webp);
+    min-height: 460px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position:center;
+  }
+  .awards-recog::before{
+      display: none;
+  }
+  .awards-recog h1 strong {
+      display: block;
+  }
+  section.long-history-main .row {
+    align-items: center;
+  }
+  section.long-history-main .history-image-icon img {
+    width: 100%;
+    max-width: 340px;
+    margin: auto;
+}
+.history-image-icon {
+  text-align: center;
+}
+section.long-history-main:nth-child(even) {
+  background: #f9fbfc;
+}
+.awards-recog span {
+  z-index: 1;
+}
+
+body .awards-recog span::before {
+  background-image: linear-gradient(45deg, #d9e6e8, #ffffff30);
+}
+  @media (max-width: 767px) {
+    .awards-recog {
+        background-position: center right;
+    }
+    .btn-deliver-wrap-set {
+        margin-top: 5px;
+    }
+
+  section.long-history-main .row {
+    align-items: center;
+    flex-direction: column-reverse;
+}
+  }
